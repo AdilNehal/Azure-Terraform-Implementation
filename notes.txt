@@ -1,0 +1,49 @@
+Vault Installation
+
+Option A: Quick Dev Mode (not secure, for testing only)
+
+# vault server -dev
+
+This will:
+
+Automatically unseal Vault
+
+Show you a root token in the output
+
+Use in-memory storage (data gone after restart)
+
+Use this if you're just testing Terragrunt + Vault
+
+Option B: Run Vault with TLS as a Service (secure, persistent)
+
+# sudo nano /etc/vault.d/vault.hcl
+
+Paste:
+
+storage "file" {
+  path = "/opt/vault/data"
+}
+
+listener "tcp" {
+  address     = "0.0.0.0:8200"
+  tls_cert_file = "/opt/vault/tls/vault.crt"
+  tls_key_file  = "/opt/vault/tls/vault.key"
+}
+
+api_addr = "https://127.0.0.1:8200"
+ui       = true
+
+Then run:
+
+# sudo systemctl enable vault
+# sudo systemctl start vault
+
+FOR DEV testing
+
+stop the vault Service
+
+vault server -dev
+
+Then in new terminal
+export VAULT_ADDR='http://127.0.0.1:8200'
+export VAULT_TOKEN=<token root>
