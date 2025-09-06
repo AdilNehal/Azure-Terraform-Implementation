@@ -44,6 +44,14 @@ stop the vault Service
 
 vault server -dev
 
-Then in new terminal
+Then in new terminalh
 export VAULT_ADDR='http://127.0.0.1:8200'
 export VAULT_TOKEN=<token root>
+
+
+vault kv put secret/azure \
+    tenant_id="blablabla" \
+    subscription_id="blablabla" \
+    client_id="blablabla" \
+    client_secret="blablabla" \
+    resource_group_name="blablabla"

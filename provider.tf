@@ -7,9 +7,13 @@ terraform {
   }
 }
 
+provider "vault" {
+  address = "http://127.0.0.1:8200"
+  token   = "root" # from dev server output, replace in real setup
+}
+
 provider "azuread" {
-  # Configuration options
-  tenant_id       = var.tenant_id
-  client_id       = var.client_id
-  client_secret   = var.client_secret
+  tenant_id     = data.vault_generic_secret.azure.data["tenant_id"]
+  client_id     = data.vault_generic_secret.azure.data["client_id"]
+  client_secret = data.vault_generic_secret.azure.data["client_secret"]
 }
