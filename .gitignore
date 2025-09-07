@@ -1,0 +1,13 @@
+# Terraform local state
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+
+# Local .terraform directories
+.terraform/
+.terraform.lock.hcl
+
+# Terragrunt
+.terragrunt-cache/
