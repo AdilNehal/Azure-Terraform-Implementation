@@ -1,0 +1,54 @@
+first I use this:
+
+locals {
+  user_information = nonsensitive(data.vault_generic_secret.user_information.data)
+
+}
+
+then looping like: 
+
+module "azure_user" {
+  source = "./modules/users"
+  for_each = local.user_information
+
+  display_name          = each.value.display_name
+  user_principal_name   = each.value.user_principal_name
+  password              = each.value.password
+  force_password_change = var.force_password_change
+}
+
+but it was giving me:
+
+  ╷
+  │ Error: Unsupported attribute
+  │ 
+  │   on main.tf line 10, in module "azure_user":
+  │   10:   display_name          = each.value.display_name
+  │     ├────────────────
+  │     │ each.value is "{\"display_name\":\"had\",\"password\":\"value321\",\"user_principal_name\":\"had@adilnehal65gmail.onmicrosoft.com\"}"
+  │ 
+  │ Can't access attributes on a primitive-typed value (string).
+  ╵
+
+Because:
+
+Vault is giving a map of strings, where each string is itself a JSON blob. That’s why Terraform says each.value is a primitive string and not an object. LIKE:
+
+{
+  "alicebob" = "{\"display_name\":\"alicebob\",\"password\":\"value321\",\"user_principal_name\":\"alicebob@adilnehal65gmail.onmicrosoft.com\"}"
+}
+
+
+So before looping, we need to jsondecode each value.
+
+locals {
+  raw_user_information = nonsensitive(data.vault_generic_secret.user_information.data)
+
+  # Decode each JSON string into a map/object
+  user_information = {
+    for k, v in local.raw_user_information :
+    k => jsondecode(v)
+  }
+}
+
+Now each.value is a proper object with attributes (display_name, password, user_principal_name) instead of just a JSON string.

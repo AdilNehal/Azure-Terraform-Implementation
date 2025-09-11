@@ -1,0 +1,17 @@
+{
+  "alicebob":{
+    "user_principal_name": "alicebob@adilnehal65gmail.onmicrosoft.com",
+    "display_name": "alicebob",
+    "password": "value321"
+  },
+  "has":{
+    "user_principal_name": "has@adilnehal65gmail.onmicrosoft.com",
+    "display_name": "has",
+    "password": "value321"
+  },
+  "had":{
+    "user_principal_name": "had@adilnehal65gmail.onmicrosoft.com",
+    "display_name": "had",
+    "password": "value321"
+  }
+}
