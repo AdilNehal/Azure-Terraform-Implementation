@@ -17,3 +17,11 @@ module "azure_user" {
   password              = each.value.password
   force_password_change = var.force_password_change
 }
+
+module "azure_groups" {
+  source           = "./modules/Groups"
+  for_each        = { for group in var.groups : group.group_name => group }
+  group_name      = each.value.group_name
+  description     = each.value.description
+  security_enabled = var.security_enabled
+}
