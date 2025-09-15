@@ -52,3 +52,48 @@ locals {
 }
 
 Now each.value is a proper object with attributes (display_name, password, user_principal_name) instead of just a JSON string.
+
+
+for_each = { for group in var.groups : group.group_name => group }
+
+variables.tf
+"groups" { 
+  description = "list of groups to create with their properties" 
+  type = list(any) 
+} 
+
+tfvars
+
+groups = [
+  {
+    group_name   = "Security Admins"
+    description  = "Security Administrators Group"
+  }
+]
+
+for group in var.groups — iterate
+This starts a for expression that iterates the list. On each iteration group is one element of the list (the object).
+
+group.group_name => group — create a map entry
+For each group we build a key/value pair where:
+
+key = group.group_name (a string, "Security Admins"), and
+
+value = the whole group object.
+
+Result — a map
+The for expression returns this map:
+
+{
+  "Security Admins" = {
+    group_name  = "Security Admins"
+    description = "Security Administrators Group"
+  }
+}
+
+
+That map is what you assign to for_each. Terraform will create one instance for each map entry. Inside the resource/module:
+
+each.key → "Security Admins"
+
+each.value → { group_name = "Security Admins", description = "..." }

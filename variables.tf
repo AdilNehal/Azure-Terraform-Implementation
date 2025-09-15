@@ -12,3 +12,8 @@ variable "security_enabled" {
   description = "Indicates whether the group is a security group"
   type        = bool
 }
+
+variable "group_membership" {
+  description = "Mapping of group names to their member user principal names"
+  type        = list(any)
+}
