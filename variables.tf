@@ -13,7 +13,7 @@ variable "security_enabled" {
   type        = bool
 }
 
-variable "group_membership" {
-  description = "Mapping of group names to their member user principal names"
-  type        = list(any)
-}
+# variable "group_membership" {
+#   description = "Mapping of group names to their member user principal names"
+#   type        = list(any)
+# }

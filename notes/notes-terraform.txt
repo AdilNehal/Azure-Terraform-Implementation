@@ -97,3 +97,130 @@ That map is what you assign to for_each. Terraform will create one instance for 
 each.key → "Security Admins"
 
 each.value → { group_name = "Security Admins", description = "..." }
+
+------
+
+why we flatten first? 
+
+  memberships = flatten([
+    for gm in var.group_membership : [
+      for member in gm.member_names : {
+        group_name = gm.group_name
+        member     = member
+      }
+    ]
+  ])
+
+let's see my variables:
+
+group_membership = [
+  {
+    group_name   = "Security Admins"
+    member_names = ["alice@contoso.com", "bob@contoso.com"]
+  },
+  {
+    group_name   = "Readers"
+    member_names = ["carol@contoso.com"]
+  }
+]
+
+Without flatten
+
+If we just for gm in var.group_membership : [...], we’d get a list of lists:
+
+[
+  [ # first group
+    { group_name = "Security Admins", member = "alice@contoso.com" },
+    { group_name = "Security Admins", member = "bob@contoso.com" }
+  ],
+  [ # second group
+    { group_name = "Readers", member = "carol@contoso.com" }
+  ]
+]
+
+it’s a nested list (list(list(object(...)))).
+
+Why we flatten
+
+Terraform’s for_each in a resource needs a flat map or set, not a list of lists.
+So we flatten to turn it into a single list:
+
+[
+  { group_name = "Security Admins", member = "alice@contoso.com" },
+  { group_name = "Security Admins", member = "bob@contoso.com" },
+  { group_name = "Readers",         member = "carol@contoso.com" }
+]
+
+Then we convert to a map
+for_each = {
+  for m in local.memberships : "${m.group_name}-${m.member}" => m
+}
+
+
+This makes a clean map for for_each like:
+
+{
+  "Security Admins-alice@contoso.com" = { group_name = "Security Admins", member = "alice@contoso.com" }
+  "Security Admins-bob@contoso.com"   = { group_name = "Security Admins", member = "bob@contoso.com" }
+  "Readers-carol@contoso.com"         = { group_name = "Readers", member = "carol@contoso.com" }
+}
+
+group_object_id = lookup(module.azure_groups.group_details, each.value.group_name) 
+member_object_id = lookup(module.azure_user.user_details, each.value.member)
+
+& why this?
+
+What you already have
+
+Your modules export two maps:
+
+Groups
+output "group_details" {
+  value = {
+    "Security Admins" = "11111111-1111-1111-1111-111111111111"
+    "Readers"         = "22222222-2222-2222-2222-222222222222"
+  }
+}
+
+Users
+output "user_details" {
+  value = {
+    "alice@contoso.com" = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+    "bob@contoso.com"   = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+    "carol@contoso.com" = "cccccccc-cccc-cccc-cccc-cccccccccccc"
+  }
+}
+
+What azuread_group_member needs
+
+The resource requires object IDs:
+
+resource "azuread_group_member" "this" {
+  group_object_id  = <GUID of the group>
+  member_object_id = <GUID of the user>
+}
+
+
+But in your group_membership variable, you’re passing names / UPNs (e.g. "Security Admins", "alice@contoso.com").
+
+So you need a lookup step:
+
+Take each.value.group_name (like "Security Admins") → find its ID in module.azure_groups.group_details
+
+Take each.value.member (like "alice@contoso.com") → find its ID in module.azure_user.user_details
+
+Why lookup()
+
+We could technically do:
+
+module.azure_groups.group_details[each.value.group_name]
+module.azure_user.user_details[each.value.member]
+
+
+But that would throw an error if the key doesn’t exist.
+
+Using lookup(map, key) is safer:
+
+Returns the value if found
+
+Optionally, you can give a default if not found (e.g. lookup(map, key, null))

@@ -26,3 +26,14 @@ output "user_details" {
 output "group_ids" {
   value = flatten([for group in module.azure_groups : group.group_ids])
 }
+
+output "group_names" {
+  value = flatten([for group in module.azure_groups : group.group_names])
+}
+
+output "group_details" {
+  value = zipmap(
+    flatten([for group in module.azure_groups : group.group_names]),
+    flatten([for group in module.azure_groups : group.group_ids])
+  )
+}

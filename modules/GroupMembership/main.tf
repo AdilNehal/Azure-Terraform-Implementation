@@ -1,4 +1,4 @@
-resource "azuread_group_member" "example" {
-  group_object_id  = azuread_group.example.object_id
-  member_object_id = data.azuread_user.example.object_id
+resource "azuread_group_member" "this" {
+  group_object_id  = var.group_object_id
+  member_object_id = var.member_object_id
 }
