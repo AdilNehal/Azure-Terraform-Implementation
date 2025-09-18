@@ -8,6 +8,12 @@ variable "groups" {
   type        = list(any)
 }
 
+variable "owners" {
+  description = "List of owner object IDs to assign to each group"
+  type        = list(string)
+  default     = []
+}
+
 variable "security_enabled" {
   description = "Indicates whether the group is a security group"
   type        = bool

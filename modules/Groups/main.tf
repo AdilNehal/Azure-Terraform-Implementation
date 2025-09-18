@@ -3,4 +3,5 @@ resource "azuread_group" "azuread_groups" {
   description  = var.description
   security_enabled = var.security_enabled
   members = var.members
+  owners =  var.owners
 }

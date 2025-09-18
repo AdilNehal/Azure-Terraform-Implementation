@@ -17,3 +17,8 @@ variable "members" {
   description = "List of user principal names to be added as members of the group"
   type        = list(string)
 }
+
+variable "owners" {
+  description = "List of owner object IDs to assign to the group"
+  type        = list(string)
+}

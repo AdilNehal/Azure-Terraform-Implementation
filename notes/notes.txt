@@ -1,0 +1,18 @@
+How to decide who the owner should be
+
+There are a few common patterns:
+
+Admin/Service Principal Owner
+
+    Make the Terraform service principal the owner, so it can always update the group later.
+    Useful if groups are meant to be managed only via automation.
+
+Team Lead Owner
+
+    Assign a human user (e.g. teamlead@domain.com) as the owner.
+    They’ll be able to add/remove members in the portal without needing Terraform.
+
+Both
+
+    Assign both the Terraform SP and a team lead (or multiple leads) as owners.
+    This balances automation and human self-service.

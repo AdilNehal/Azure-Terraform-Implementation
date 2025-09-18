@@ -28,13 +28,18 @@ module "azure_user" {
   force_password_change = var.force_password_change
 }
 
-# https://discuss.hashicorp.com/t/create-user-group-and-membership-in-azure-from-a-map-list/55861/3
+# https://discuss.hashicorp.com/t/create-user-group-and-membership-in-azure-from-a-map-list/55861/
+# For the owners passing both SP & human
 module "azure_groups" {
   source           = "./modules/Groups"
   for_each         = { for group in var.groups : group.group_name => group }
   group_name       = each.value.group_name
   description      = each.value.description
   security_enabled = var.security_enabled
+  owners = concat(
+    var.owners,                               
+    [data.azuread_client_config.current.object_id] 
+  )
   members = [ 
     for member_email in flatten(each.value.members) : data.azuread_user.readusers[member_email].object_id
   ]
